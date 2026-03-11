@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { CgLogIn } from "react-icons/cg";
+import { useGoogleLogin } from "@react-oauth/google";
 import ThemeToggle from "./ThemeToggle";
 
 function EmailInput() {
@@ -8,6 +9,28 @@ function EmailInput() {
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [error, setError] = useState("");
+  const [googleUser, setGoogleUser] = useState(null);
+
+  const handleGoogleLogin = useGoogleLogin({
+    redirect_uri: import.meta.env.VITE_REDIRECT_URI,
+    onSuccess: async (tokenResponse) => {
+      try {
+        const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
+        const userInfo = await res.json();
+        setGoogleUser(userInfo);
+        setIsLoggedIn(true);
+        setTimeout(() => {
+          setIsLoggedIn(false);
+          setGoogleUser(null);
+        }, 3000);
+      } catch {
+        setError("Failed to fetch Google user info.");
+      }
+    },
+    onError: () => setError("Google sign-in was cancelled or failed."),
+  });
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -138,16 +161,19 @@ function EmailInput() {
           <div className="mx-1 md:mx-12">
             <button
               type="button"
+              onClick={() => handleGoogleLogin()}
               className="w-full font-semibold bg-white dark:bg-neutral-800 text-neutral-800 dark:text-white border border-neutral-400 dark:border-neutral-600 py-1 rounded-3xl flex items-center justify-center gap-4 hover:bg-blue-50  transition"
             >
               <FcGoogle className="text-2xl bg-white rounded-full w-8 h-8" />
-              Sign In with Google
+              Continue with Google
             </button>
           </div>
 
           {isLoggedIn && (
             <p className="text-green-500 text-center font-medium">
-              Successfully logged in!
+              {googleUser
+                ? `Welcome, ${googleUser.name}!`
+                : "Successfully logged in!"}
             </p>
           )}
 
