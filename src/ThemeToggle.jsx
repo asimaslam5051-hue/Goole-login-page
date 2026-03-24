@@ -1,75 +1,40 @@
-import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes"; 
 import {
-  SunIcon,
-  MoonIcon,
-  ComputerDesktopIcon,
-} from "@heroicons/react/20/solid";
-import useTheme from "./UseTheme";
-
-const themes = {
-  light: { name: "Light", Icon: SunIcon },
-  dark: { name: "Dark", Icon: MoonIcon },
-  system: { name: "System", Icon: ComputerDesktopIcon },
-};
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const ThemeToggle = () => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [theme, setTheme] = useTheme();
-  const dropdownRef = useRef(null);
-
-  const CurrentIcon = themes[theme]?.Icon || SunIcon;
-
-  
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const { theme, setTheme } = useTheme();
 
   return (
-    <div ref={dropdownRef} className="relative">
-    
-      <button
-        onClick={() => setDropdownOpen((prev) => !prev)}
-        className="relative inline-flex items-center justify-center size-9 rounded-md border 
-        bg-white dark:bg-neutral-800 shadow hover:bg-gray-100 
-        dark:hover:bg-neutral-700 transition"
-      >
-        <CurrentIcon className="w-5 h-5 text-black dark:text-white" />
-      </button>
+    <nav className="p-4 flex items-center justify-between">
+      <DropdownMenu>
+        <DropdownMenuTrigger aschild>
+          <Button variant="outline" size="icon" className="relative">
+             <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+             <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        </DropdownMenuTrigger>
 
-      {dropdownOpen && (
-        <div
-          className="absolute right-0 mt-2 w-36 rounded-md shadow-lg 
-          bg-white dark:bg-neutral-800 border border-gray-200 
-          dark:border-neutral-700 z-50 animate-fadeIn"
-        >
-          {Object.keys(themes).map((key) => {
-            const Icon = themes[key].Icon;
-            return (
-              <button
-                key={key}
-                onClick={() => {
-                  setTheme(key);
-                  setDropdownOpen(false);
-                }}
-                className="flex items-center gap-2 w-full px-4 py-2 text-sm 
-                text-gray-700 dark:text-gray-300 
-                hover:bg-gray-100 dark:hover:bg-neutral-700 transition"
-              >
-                <Icon className="w-4 h-4" />
-                {themes[key].name}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setTheme("light")}>
+            Light
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme("dark")}>
+            Dark
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme("system")}>
+            System
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </nav>
   );
 };
 
